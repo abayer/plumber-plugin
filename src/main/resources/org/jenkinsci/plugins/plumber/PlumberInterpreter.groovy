@@ -53,7 +53,21 @@ class PlumberInterpreter implements Serializable {
         }
     }
 
-    @NonCPS
+    def call(Closure c) {
+        Root root = getRootConfig(c)
+
+        def executionSets = root.executionSets()
+
+        for (int i = 0; i < executionSets.size(); i++) {
+            def exSet = executionSets.get(i)
+
+            debugLog(root.debug, "Creating stage ${exSet.stageName}")
+            script.stage exSet.stageName
+            parallelizePhases(root, exSet.phases).call()
+        }
+    }
+
+
     def getRootConfig(Closure c) {
         def conf = new PlumberConfig()
         conf.fromClosure(c)
